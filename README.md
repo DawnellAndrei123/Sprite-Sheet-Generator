@@ -25,11 +25,19 @@ Sources:
 
 ## Publish with GitHub Pages
 
-This repository includes a GitHub Pages workflow at `.github/workflows/pages.yml`. After pushing to `main`, GitHub Actions can deploy the static files to:
+This is a plain static app, so publish it directly from the `main` branch root:
+
+1. Open repository Settings.
+2. Open Pages in the left sidebar.
+3. Under Build and deployment, set Source to Deploy from a branch.
+4. Select branch `main` and folder `/ (root)`.
+5. Click Save.
+
+After GitHub finishes the Pages deployment, the app will be available at:
 
 `https://dawnellandrei123.github.io/Sprite-Sheet-Generator/`
 
-If the first workflow run fails with a Pages enablement error, open the repository settings, choose Pages, set the source to GitHub Actions, then rerun the workflow. GitHub requires the repository owner to enable Pages once before the Actions deployment token can publish the site.
+GitHub says Pages can take up to 10 minutes to publish after setup.
 
 ## Local use
 
