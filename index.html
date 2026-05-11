@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Sprite Sheet Generator</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Pixel animation lab</p>
+          <h1>AI Sprite Sheet Generator</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-button primary" id="generateButton" type="button" title="Generate sprite sheet">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7z"></path>
+            </svg>
+            Generate
+          </button>
+          <button class="icon-button" id="downloadPngButton" type="button" title="Download PNG sprite sheet" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v11m0 0 4-4m-4 4-4-4M5 18h14"></path>
+            </svg>
+            PNG
+          </button>
+          <button class="icon-button" id="downloadJsonButton" type="button" title="Download JSON metadata" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 3h7l5 5v13H7z"></path>
+              <path d="M14 3v5h5M9 13h6M9 17h6"></path>
+            </svg>
+            JSON
+          </button>
+        </div>
+      </header>
+
+      <section class="workspace-grid">
+        <aside class="panel controls-panel" aria-label="Sprite controls">
+          <div class="panel-heading">
+            <h2>Inputs</h2>
+            <button class="text-button" id="sampleButton" type="button">Use sample</button>
+          </div>
+
+          <div class="upload-grid">
+            <label class="upload-tile" for="frontUpload">
+              <span>Front view</span>
+              <strong id="frontName">South reference</strong>
+              <input id="frontUpload" type="file" accept="image/png,image/jpeg,image/webp">
+            </label>
+            <label class="upload-tile" for="backUpload">
+              <span>Back view</span>
+              <strong id="backName">North reference</strong>
+              <input id="backUpload" type="file" accept="image/png,image/jpeg,image/webp">
+            </label>
+            <label class="upload-tile" for="sideUpload">
+              <span>Side view</span>
+              <strong id="sideName">East and West reference</strong>
+              <input id="sideUpload" type="file" accept="image/png,image/jpeg,image/webp">
+            </label>
+          </div>
+
+          <div class="control-group">
+            <label for="promptInput">Character prompt</label>
+            <textarea id="promptInput" rows="4" placeholder="Armored knight, readable silhouette, 32-bit pixel art, transparent background"></textarea>
+          </div>
+
+          <div class="slider-grid">
+            <label class="range-control" for="frameCount">
+              <span>Frames</span>
+              <strong><output id="frameCountValue">8</output></strong>
+              <input id="frameCount" type="range" min="2" max="16" step="1" value="8">
+            </label>
+            <label class="range-control" for="cellSize">
+              <span>Sprite size</span>
+              <strong><output id="cellSizeValue">96</output> px</strong>
+              <input id="cellSize" type="range" min="16" max="2048" step="16" value="96">
+            </label>
+          </div>
+
+          <div class="control-group">
+            <span class="label-text">Animations</span>
+            <div class="toggle-grid" id="animationToggles">
+              <label><input type="checkbox" value="idle" checked> Idle</label>
+              <label><input type="checkbox" value="walk" checked> Walk</label>
+              <label><input type="checkbox" value="run" checked> Run</label>
+              <label><input type="checkbox" value="attack" checked> Attack</label>
+              <label><input type="checkbox" value="dying" checked> Dying</label>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <span class="label-text">Directions</span>
+            <div class="direction-map" aria-label="Generated directions">
+              <span>NW</span><span>N</span><span>NE</span>
+              <span>W</span><span class="center-dot"></span><span>E</span>
+              <span>SW</span><span>S</span><span>SE</span>
+            </div>
+          </div>
+        </aside>
+
+        <section class="panel preview-panel" aria-label="Sprite sheet preview">
+          <div class="panel-heading">
+            <div>
+              <h2>Preview</h2>
+              <p id="sheetStats">Upload references or use the sample character.</p>
+            </div>
+            <div class="playback-controls">
+              <button class="square-button" id="playButton" type="button" title="Play preview">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5v14l11-7z"></path>
+                </svg>
+              </button>
+              <select id="previewSelect" aria-label="Preview animation">
+                <option value="idle:S">Idle South</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="canvas-wrap">
+            <canvas id="sheetCanvas" width="960" height="640"></canvas>
+          </div>
+
+          <div class="strip-preview" aria-label="Animation strip preview">
+            <canvas id="stripCanvas" width="640" height="160"></canvas>
+          </div>
+        </section>
+
+        <aside class="panel ai-panel" aria-label="AI generation pipeline">
+          <div class="panel-heading">
+            <h2>AI Job</h2>
+            <button class="text-button" id="copyPromptButton" type="button">Copy prompt</button>
+          </div>
+
+          <div class="control-group">
+            <label for="aiEndpoint">Private AI endpoint</label>
+            <input id="aiEndpoint" type="url" placeholder="https://your-backend.example.com/api/generate">
+          </div>
+
+          <button class="icon-button ai-button" id="runAiButton" type="button" title="Run AI generation through private backend">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"></path>
+              <path d="M18 15l.9 2.6 2.6.9-2.6.9L18 23l-.9-2.6-2.6-.9 2.6-.9z"></path>
+            </svg>
+            Run AI job
+          </button>
+
+          <div class="prompt-box">
+            <label for="aiPrompt">Generated production prompt</label>
+            <textarea id="aiPrompt" rows="12" readonly></textarea>
+          </div>
+
+          <div class="status-box" id="statusBox" role="status">
+            Ready. Local generator uses your uploaded views to produce a preview sheet; connect a backend for production AI image generation.
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
