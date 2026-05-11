@@ -29,7 +29,7 @@ This repository includes a GitHub Pages workflow at `.github/workflows/pages.yml
 
 `https://dawnellandrei123.github.io/Sprite-Sheet-Generator/`
 
-If Pages is not enabled yet, open the repository settings, choose Pages, and set the source to GitHub Actions.
+If the first workflow run fails with a Pages enablement error, open the repository settings, choose Pages, set the source to GitHub Actions, then rerun the workflow. GitHub requires the repository owner to enable Pages once before the Actions deployment token can publish the site.
 
 ## Local use
 
